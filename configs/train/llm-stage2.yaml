@@ -1,0 +1,16 @@
+base: llm.yaml
+declare_new_keys:
+- stage_parent
+stage: stage2
+stage_parent: stage1
+optimizer:
+  warmup_steps: 0
+train:
+  output_dir: ${OQM_OUTPUT_ROOT:-./outputs}/llm/stage2
+  allow_root_stage: false
+  inherit_data_state_from_parent: true
+  expected_world_size: 64
+  gradient_accumulation_steps: 2
+  expected_global_batch_size: 128
+  max_steps: 5000
+  save_final_checkpoint: true

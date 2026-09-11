@@ -1,0 +1,50 @@
+format_version: oqm.render.latent-cache.config.v2
+stft:
+  n_fft: 960
+  win_length: 960
+  hop_length: 480
+  window: hann_periodic
+  center: false
+  explicit_left_padding: 240
+  explicit_right_padding: true
+  keep_dc: true
+  drop_nyquist: true
+  bins: 480
+  analysis_dtype: float32
+  profile: open_qwen_music_v1
+  normalized: false
+  revision: open-qwen-music-stft-v1
+latent_cache:
+  format_version: oqm.render.latent-cache.v2
+  manifest: ${OQM_DATA_ROOT:-./data}/inference/all.audio.jsonl
+  vae_checkpoint: ${OQM_CHECKPOINT_ROOT:-./checkpoints}/acoustic-vae.pt
+  vae_checkpoint_sha256: 1b2d173f157be3b2cdc0ad61bbf087023126fecc22e148454cb2464281abd697
+  vae_revision: open-qwen-music-acoustic-vae-v1
+  stft_revision: open-qwen-music-stft-v1
+  stft_config_sha256: 00cb3eb0368a2f5f7d84b9058d7cfcf20963311819be19dc78fcb6d8eb2dce9c
+  output_dir: ${OQM_OUTPUT_ROOT:-./outputs}/inference/latent-cache
+  device: cuda
+  stats:
+    output: ${OQM_OUTPUT_ROOT:-./outputs}/inference/latent_stats.json
+    posterior_mode: sample
+    posterior_base_seed: 2026090201
+    minimum_std: 1.0e-06
+    sampler:
+      split: train
+      epochs: 1
+      seed: 20260902
+      shuffle: true
+      max_records: 8192
+      strategy: proportional_dataset_family_duration
+      duration_buckets_seconds:
+      - 30
+      - 90
+      - 180
+      - 360
+  cache:
+    stats_path: ${OQM_DATA_ROOT:-./data}/inference/latent_stats.json
+    stats_sha256: ''
+    posterior_mode: sample
+    posterior_base_seed: 2026090201
+    dtype: float16
+    resume_existing: true

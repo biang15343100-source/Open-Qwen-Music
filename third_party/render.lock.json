@@ -1,0 +1,27 @@
+{
+  "schema_version": "oqm.render-lock.v1",
+  "components": {
+    "text_encoder": {
+      "name": "Qwen3-Embedding-0.6B",
+      "paper": "https://arxiv.org/abs/2506.05176",
+      "repository": "https://huggingface.co/Qwen/Qwen3-Embedding-0.6B",
+      "revision": "b22da495047858cce924d27d76261e96be6febc0",
+      "model_revision": "b22da495047858cce924d27d76261e96be6febc0",
+      "tokenizer_revision": "b22da495047858cce924d27d76261e96be6febc0",
+      "code_license": "Apache-2.0",
+      "weight_license": "Apache-2.0",
+      "allowed_use": [
+        "research",
+        "commercial"
+      ],
+      "local_path": "models/Qwen3-Embedding-0.6B",
+      "files": {
+        "model.safetensors": "0437e45c94563b09e13cb7a64478fc406947a93cb34a7e05870fc8dcd48e23fd",
+        "config.json": "b5bf1f51fc45be473a54718cef92448d90a1be001bf9b9a44b8c7f10a19feaa9",
+        "tokenizer.json": "def76fb086971c7867b829c23a26261e38d9d74e02139253b38aeb9df8b4b50a",
+        "tokenizer_config.json": "253153d0738ceb4c668d2eff957714dd2bea0b56de772a9fdccd96cbf517e6a0"
+      },
+      "usage": "Frozen per-token hidden features for descriptions; lyrics use the trainable six-layer RoPE encoder."
+    }
+  }
+}

@@ -1,0 +1,65 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "open-qwen-music"
+version = "0.1.0"
+description = "Open-Qwen-Music training and inference pipelines"
+readme = "README.md"
+license = "Apache-2.0"
+license-files = [
+  "LICENSE",
+  "third_party/LICENSE-EAR_VAE2.txt",
+  "third_party/LICENSE-STABLE_AUDIO_3.txt",
+  "third_party/LICENSE-XTRANSFORMERS.txt",
+]
+requires-python = ">=3.10"
+dependencies = [
+  "torch>=2.4",
+  "numpy>=1.26,<3",
+  "scipy>=1.15.3; python_version < '3.11'",
+  "scipy>=1.17.1; python_version >= '3.11'",
+  "PyYAML>=6.0",
+  "soundfile>=0.12",
+  "mutagen>=1.47",
+  "pypinyin>=0.53",
+  "cmudict>=1.1",
+  "tokenizers>=0.20",
+]
+
+[project.optional-dependencies]
+train = ["tensorboard>=2.15", "pyarrow>=22.0.0", "torchaudio>=2.4"]
+render = [
+  "transformers>=4.57.6",
+  "huggingface-hub>=1.0",
+  "safetensors>=0.6",
+  "nnAudio==0.3.4",
+  "soxr>=1.0",
+]
+dev = ["pytest>=8.0", "ruff>=0.9"]
+
+[project.scripts]
+oqm-render = "open_qwen_music.render.cli:main"
+oqm-llm = "open_qwen_music.llm.cli:main"
+oqm-tokenizer-train = "open_qwen_music.tokenizer.cli:train_main"
+oqm-tokenizer-encode = "open_qwen_music.tokenizer.cli:encode_main"
+oqm-tokenizer-export = "open_qwen_music.tokenizer.cli:export_main"
+oqm-tokenizer-initialize = "open_qwen_music.tokenizer.initialization:main"
+oqm-materialize-llm = "open_qwen_music.llm.materialize:main"
+oqm-materialize-renderer = "open_qwen_music.render.materialize:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+# Include the repository root so tests can import shared launcher helpers.
+pythonpath = [".", "src", "scripts"]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]

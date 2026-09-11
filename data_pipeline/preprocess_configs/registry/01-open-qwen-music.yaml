@@ -1,0 +1,19 @@
+dataset_id: 1
+slug: open-qwen-music-dataset
+name: Open-Qwen-Music Dataset
+group: public
+sources:
+- storage_class: tar
+  root: ${OQM_DATASET_ROOT:-./datasets/open-qwen-music}/data
+  glob: train-*.tar
+  audio_only: false
+  include_regex:
+  - '\.audio$'
+expected_item_count: 62417
+content_type: music_mix
+granularity: whole_song
+domain: music
+license:
+  id: LicenseRef-OQM-Academic-Research-Only-1.0
+  family: research_only
+  commercial_ok: false

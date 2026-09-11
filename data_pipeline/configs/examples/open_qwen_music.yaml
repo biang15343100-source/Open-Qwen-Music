@@ -1,0 +1,11 @@
+base: ../base.yaml
+work_dir: ${ANNOT_WORK:-./.runtime/work}/open-qwen-music
+index:
+  min_duration_sec: 20.0
+  max_duration_sec: 600.0
+  sources:
+  - dataset: open-qwen-music-dataset
+    release: ${OQM_CORPUS_RELEASE:-./.release/oqm-corpus-v1}
+    granularity: whole_song
+emit:
+  output_path: ${ANNOT_WORK:-./.runtime/work}/open-qwen-music/annotation.jsonl

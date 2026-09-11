@@ -1,0 +1,37 @@
+name: CPU checks
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install system dependencies
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg libsndfile1
+      - name: Install project
+        run: |
+          python -m pip install -e ".[render,train,dev]"
+          python -m pip install -e "./data_pipeline[dev]"
+      - name: Lint
+        run: python -m ruff check src scripts data_pipeline/src tests data_pipeline/tests
+      - name: Compile
+        run: python -m compileall -q src scripts data_pipeline/src
+      - name: Build wheels
+        run: python -m pip wheel --no-deps . ./data_pipeline --wheel-dir /tmp/oqm-wheels
+      - name: Generic torchrun launcher
+        run: python -m pytest -q tests/test_torchrun_launcher.py
+      - name: CPU tests
+        run: python -m pytest -q tests
+      - name: Data pipeline tests
+        run: python -m pytest -q data_pipeline/tests

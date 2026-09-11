@@ -1,0 +1,66 @@
+format_version: oqm.music-language-model.inference.v1
+
+model:
+  dtype: bf16
+  attn_implementation: flash_attention_2
+  loss_chunk_size: 256
+  accuracy_sample_positions: 4096
+  melody_class_weights:
+    unvoiced_id: 255
+    unvoiced_weight: 0.85
+  modality_type_embeddings: false
+  grammar_constrained_loss: false
+  grammar_constrained_metrics: true
+  base_model_revision: sha256:5c2916d56a0cd5a0577be954b00cbc075e940f2639afac0b4058f2955e48d709
+  text_tokenizer_revision: sha256:9a8c66e1f2cc17a84adafc768aaefb79bfe9ba66c1594b73e7aab4320083ca6f
+
+registry:
+  text_vocab_size: 151936
+  semantic_size: 32768
+  melody_size: 256
+  pad_to_multiple_of: 256
+  semantic_tokenizer_revision: 90cc6f15752758c14ffe0758086d61c5a18d170d43f7a3adbf77aea7a4108898
+  semantic_extractor_revision: e5f998fbd9b95a9289d2abcd148be459dfeded67eb46017018442e9a217850c5
+
+condition:
+  tag_fields:
+    - genre
+    - mood
+    - instruments
+    - vocal_gender
+    - vocal_timbre
+    - language
+    - bpm
+    - key
+  include_instrumental_language: true
+  include_instrumental_marker: true
+
+sequence:
+  max_sequence_length: 4096
+  max_semantic_frames: 750
+  min_semantic_frames: 100
+  max_condition_tokens: 1792
+  min_section_melody_frames: 2
+  melody_section_policy: lyrics_only
+  resample_unique_sections: false
+  semantic_section_reanchor: false
+  semantic_anchor_max_text_tokens: 256
+  semantic_anchor_boundary_policy: oracle_section_start
+  semantic_anchor_require_complete_plan: false
+  random_crop: false
+  overflow_policy: error
+
+generation:
+  precision: bf16
+  max_new_tokens: 2048
+  min_semantic_frames: 25
+  max_semantic_frames: 750
+  temperature: 0.7
+  top_p: 0.98
+  top_k: 0
+  semantic_repetition_penalty: 0.1
+  semantic_repetition_window: 64
+  plain_semantic_repetition_penalty: 0.0
+  plain_semantic_eos_bias: 0.0
+  plain_semantic_eos_bias_start_frames: 0
+  plain_semantic_eos_bias_interval_frames: 625

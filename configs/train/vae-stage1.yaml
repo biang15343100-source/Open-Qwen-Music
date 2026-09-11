@@ -1,0 +1,250 @@
+format_version: oqm.render.config.v1
+contract:
+  sample_rate: 48000
+  channels: 2
+  latent_frame_hz: 25
+  latent_dim: 128
+  segment_seconds: 1.28
+  segment_samples: 61440
+  segment_latent_frames: 32
+stft:
+  n_fft: 960
+  win_length: 960
+  hop_length: 480
+  window: hann_periodic
+  center: false
+  explicit_left_padding: 240
+  explicit_right_padding: true
+  keep_dc: true
+  drop_nyquist: true
+  bins: 480
+  analysis_dtype: float32
+  profile: open_qwen_music_v1
+  normalized: false
+  revision: open-qwen-music-stft-v1
+model:
+  spec_vae:
+    latent_dim: 128
+    posterior_variance_epsilon: 1.0e-06
+    encoder_base_channels: 64
+    decoder_base_channels: 128
+    weight_norm: true
+    revision: open-qwen-music-acoustic-vae-v1
+  recipe: open_qwen_music_vae_stage1_v1
+  contract: open-qwen-music.vae-stage1-training.v1
+  k_weighting: true
+  adaptive_log_magnitude: true
+  sample_rms_normalization: false
+  sample_rms_floor: 0.0001
+  sample_equal_reduction: true
+  spectrum_complex: 0.0
+  spectrum_linear: 0.0
+  spectrum_log1p: 0.0
+  lr_ms: 0.0
+  if_gd: 0.0
+  ccpc: 0.0
+  absolute_ipd: 0.0
+  spectral_pan: 0.0
+  waveform_l1_weight: 0.0
+  source_direct_complex_weight: 0.0
+  source_direct_complex_bandwidth: min_media_magnitude_phase
+  stft_consistency_weight: 0.0
+  waveform_peak_envelope_weight: 0.0
+  mr_ccpc_weight: 0.0
+  mel_weight: 0.0
+  mixed_scale_spectral_weight: 2.0e-06
+  kl_start_dim: 0
+  kl_reduction: channel_sum_mean
+  kl_formula: source_surrogate_no_half
+  kl_mean_scale: 1.0
+  kl_variance_scale: 1.0
+  mr_stft_weight: 1.0
+  mr_stft_recipe: source_aligned_v1
+  mr_stft_resolutions:
+  - - 32
+    - 8
+    - 32
+  - - 64
+    - 16
+    - 64
+  - - 128
+    - 32
+    - 128
+  - - 256
+    - 64
+    - 256
+  - - 512
+    - 128
+    - 512
+  - - 1024
+    - 256
+    - 1024
+  - - 2048
+    - 512
+    - 2048
+  mr_stft_spectral_convergence_weight: 1.0
+  mr_stft_adaptive_log_weight: 1.0
+  mr_stft_spectral_convergence_epsilon: 1.0e-08
+  mr_stft_window_floor: 0.001
+  mr_stft_k_weighting: true
+  mr_stft_adaptive_log_magnitude: true
+  mr_stft_sample_rms_normalization: false
+  mr_stft_sample_equal_reduction: true
+  mr_stft_view_mode: lr_ms_equal
+  mr_stft_scale_reduction: equal_mean
+  mr_stft_view_reduction: equal_mean
+  mr_stft_compute_dtype: float64
+  mr_stft_require_media_bandwidth: true
+  mixed_scale_resolutions:
+  - 64
+  - 128
+  - 256
+  - 512
+  - 1024
+  - 2048
+  mixed_scale_sample_rate: 48000
+  mixed_scale_n_mels: 64
+  mixed_scale_f_min: 0.0
+  mixed_scale_f_max: 24000.0
+  mixed_scale_log_floor: 1.0e-05
+  mixed_scale_mel_scale: htk
+  mixed_scale_mel_norm: area_hz
+  mixed_scale_scale_reduction: sum
+  mixed_scale_stereo_reduction: raw_lr_equal_mean
+  mixed_scale_sample_reduction: record_equal
+  mixed_scale_compute_dtype: float32
+  mixed_scale_require_media_bandwidth: true
+  mel:
+    n_fft: 1024
+    hop_length: 256
+    win_length: 1024
+    n_mels: 80
+    f_min: 0.0
+    f_max: 24000.0
+    sample_rms_normalization: false
+    sample_equal_reduction: true
+  mixed_scale_spectral_weight_schedule: null
+  mr_stft_spectral_convergence_relative_floor: 0.0001
+  source_if_gd_weight: 0.0
+discriminator:
+  enabled: false
+train:
+  seed: 2026082601
+  deterministic: true
+  max_steps: 90000
+  warmup_steps: 0
+  min_lr_ratio: 1.0
+  max_grad_norm: 10.0
+  num_workers: 2
+  log_every_steps: 10
+  save_every_steps: 20000
+  valid_every_steps: 0
+  valid_batch_size_per_rank: 1
+  valid_max_batches_per_rank: 8
+  valid_selection_metric: null
+  valid_patience: 0
+  valid_min_delta: 0.0001
+  output_dir: ${OQM_OUTPUT_ROOT:-./outputs}/vae-stage1/train
+  amp: false
+  amp_dtype: bfloat16
+  valid_posterior_mode: mean
+  optimizer_policy:
+    muon_implementation: oqm_explicit_newton_schulz_v1
+    non_matrix_rule: momentum_sgd
+    silent_adam_fallback: false
+  posterior_mode: sample
+  batch_size_per_rank: 4
+  segment_seconds: 1.28
+  generator_steps_per_discriminator: null
+  generator_optimizer:
+    name: muon
+    lr: 0.0001
+    momentum: 0.95
+    weight_decay: 0.1
+    nesterov: true
+    ns_steps: 5
+    implementation: ear_v2_source_v1
+    parameter_grouping: ear_v2_source_v1
+    non_matrix_rule: adamw
+    matrix_nesterov_rule: source_add
+    auxiliary_betas:
+    - 0.9
+    - 0.95
+    auxiliary_eps: 1.0e-08
+  discriminator_optimizer: null
+  model_init_seed: 2026082601
+  data_crop_base_seed: 2026082610
+  train_posterior_base_seed: 2026082611
+  posterior_epsilon_draw_layout: contiguous_bdt
+  posterior_base_seed_primary: 2026082602
+  posterior_base_seed_safety: 2026082603
+  precision: float32
+  expected_world_size: 64
+  expected_global_batch_size: 256
+  prefetch_factor: 2
+  require_empty_output_dir: true
+  require_explicit_stop_at_step: true
+  quality_gate_steps:
+  - 100
+  - 1000
+  - 5000
+  - 20000
+  - 40000
+  - 60000
+  - 90000
+  diagnostic_replay_checkpoint_steps: []
+  checkpoint_steps:
+  - 100
+  - 1000
+  - 5000
+  - 90000
+data:
+  release_ready: null
+  manifest: ${OQM_DATA_ROOT:-./data}/vae-stage1/train.jsonl
+  valid_manifest: ${OQM_DATA_ROOT:-./data}/vae-stage1/valid.jsonl
+  split: train
+  segment_samples: 61440
+  random_crop: true
+  verify_audio_sha256: true
+  audio_integrity_mode: node_once
+  allow_source_audio: true
+  require_exact_exposure: false
+  allow_prefix_exposure: false
+checkpoint:
+  format_version: oqm.render.ckpt.v1
+  required_upstream_sha_keys:
+  - data_manifest_sha256
+  - stft_config_sha256
+smoke:
+  count: 2
+  channels:
+  - 2
+  - 2
+  - 2
+  - 2
+  - 2
+  - 2
+  - 2
+  encoder_base_channels: 2
+  decoder_base_channels: 4
+  refiner_width: 4
+  refiner_depth: 1
+  discriminator_base_channels: 2
+  discriminator_depth: 2
+  stft_scales:
+  - - 256
+    - 64
+    - 256
+stage: 1
+component: spec_vae
+loss_weights:
+  stft: 1.0
+  if_gd: 0.0
+  kl: 1.0e-06
+  waveform_adversarial: 0.0
+  waveform_feature_matching: 0.0
+  spectral_adversarial: 0.0
+  spectral_feature_matching: 0.0
+spec_vae_parameter_budget:
+  minimum: 170000000
+  maximum: 171000000

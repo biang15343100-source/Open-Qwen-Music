@@ -1,0 +1,17 @@
+format_version: oqm.inference.v2
+
+model:
+  repo_id: oqmtest1451/open-qwen-music-weights
+  revision: 64b37b84fe6a62c5a08d3366470ca9d4f28b5e67
+
+llm:
+  config: language-model.yaml
+  mode: plain
+  temperature: 0.7
+  top_p: 0.98
+  semantic_repetition_penalty: 0.1
+  semantic_repetition_window: 64
+  batch_size: 1
+
+render:
+  global_loudness_lufs: -15.433497380299478

@@ -1,0 +1,197 @@
+{
+  "schema_version": "oqm.llm.logical-token-registry.v1",
+  "status": "LOGICAL_FROZEN",
+  "name": "oqm_llm_token_registry_v2",
+  "frozen_at": "2026-08-23",
+  "specification_level": "project_convention_not_qwen_music_paper_fact",
+  "semantic_tokenizer": {
+    "binding": "configs/llm/tokenizer_binding_v2.yaml",
+    "tokenizer_revision": "90cc6f15752758c14ffe0758086d61c5a18d170d43f7a3adbf77aea7a4108898",
+    "semantic_extractor_revision": "e5f998fbd9b95a9289d2abcd148be459dfeded67eb46017018442e9a217850c5",
+    "frame_rate": 25.0,
+    "codebook_size": 32768
+  },
+  "base_tokenizer": {
+    "status": "UNRESOLVED",
+    "reason": "The base Qwen model and revision are resolved when building the concrete registry.",
+    "resolved_registry_required_before_llm_training": true,
+    "base_vocab_size_definition": "len(base_tokenizer) before adding any OQM token",
+    "global_id_formula": "base_vocab_size + extension_id",
+    "all_extension_token_strings_must_be_absent_from_base": true
+  },
+  "extension_vocabulary": {
+    "extension_id_min": 0,
+    "extension_id_max_exclusive": 33048,
+    "size": 33048,
+    "addition_order": [
+      "semantic",
+      "melody",
+      "control"
+    ],
+    "semantic": {
+      "extension_id_start": 0,
+      "count": 32768,
+      "local_id_min": 0,
+      "local_id_max_exclusive": 32768,
+      "token_template": "<SEM_{local_id:05d}>",
+      "huggingface_addition_kind": "ordinary_added_token"
+    },
+    "melody": {
+      "extension_id_start": 32768,
+      "count": 256,
+      "local_id_min": 0,
+      "local_id_max_exclusive": 256,
+      "unvoiced_local_id": 255,
+      "token_template": "<MEL_{local_id:03d}>",
+      "huggingface_addition_kind": "ordinary_added_token"
+    },
+    "control": {
+      "extension_id_start": 33024,
+      "count": 24,
+      "huggingface_addition_kind": "additional_special_token",
+      "tokens": [
+        {
+          "extension_id": 33024,
+          "token": "<OQM_PAD>",
+          "role": "padding"
+        },
+        {
+          "extension_id": 33025,
+          "token": "<OQM_BOS>",
+          "role": "sequence_begin"
+        },
+        {
+          "extension_id": 33026,
+          "token": "<OQM_EOS>",
+          "role": "sequence_end"
+        },
+        {
+          "extension_id": 33027,
+          "token": "<TASK_T2M>",
+          "role": "task_text_to_music"
+        },
+        {
+          "extension_id": 33028,
+          "token": "<TASK_COVER>",
+          "role": "task_cover"
+        },
+        {
+          "extension_id": 33029,
+          "token": "<MODE_PLAIN>",
+          "role": "sequence_mode_plain"
+        },
+        {
+          "extension_id": 33030,
+          "token": "<MODE_SECTION>",
+          "role": "sequence_mode_section"
+        },
+        {
+          "extension_id": 33031,
+          "token": "<MODE_UNIQUE_SECTION>",
+          "role": "sequence_mode_unique_section"
+        },
+        {
+          "extension_id": 33032,
+          "token": "<COND_BOS>",
+          "role": "condition_begin"
+        },
+        {
+          "extension_id": 33033,
+          "token": "<COND_EOS>",
+          "role": "condition_end"
+        },
+        {
+          "extension_id": 33034,
+          "token": "<MELODY_BOS>",
+          "role": "generated_melody_begin"
+        },
+        {
+          "extension_id": 33035,
+          "token": "<MELODY_EOS>",
+          "role": "generated_melody_end"
+        },
+        {
+          "extension_id": 33036,
+          "token": "<REF_MELODY_BOS>",
+          "role": "reference_melody_begin"
+        },
+        {
+          "extension_id": 33037,
+          "token": "<REF_MELODY_EOS>",
+          "role": "reference_melody_end"
+        },
+        {
+          "extension_id": 33038,
+          "token": "<MUSIC_BOS>",
+          "role": "semantic_music_begin"
+        },
+        {
+          "extension_id": 33039,
+          "token": "<MUSIC_EOS>",
+          "role": "semantic_music_end"
+        },
+        {
+          "extension_id": 33040,
+          "token": "<SEG_END>",
+          "role": "melody_segment_end"
+        },
+        {
+          "extension_id": 33041,
+          "token": "<SECTION_INTRO>",
+          "role": "section_intro",
+          "melody_cot_eligible": false
+        },
+        {
+          "extension_id": 33042,
+          "token": "<SECTION_VERSE>",
+          "role": "section_verse",
+          "melody_cot_eligible": true
+        },
+        {
+          "extension_id": 33043,
+          "token": "<SECTION_CHORUS>",
+          "role": "section_chorus",
+          "melody_cot_eligible": true
+        },
+        {
+          "extension_id": 33044,
+          "token": "<SECTION_BRIDGE>",
+          "role": "section_bridge",
+          "melody_cot_eligible": true
+        },
+        {
+          "extension_id": 33045,
+          "token": "<SECTION_INST>",
+          "role": "section_instrumental",
+          "melody_cot_eligible": false
+        },
+        {
+          "extension_id": 33046,
+          "token": "<SECTION_OUTRO>",
+          "role": "section_outro",
+          "melody_cot_eligible": false
+        },
+        {
+          "extension_id": 33047,
+          "token": "<SECTION_SILENCE>",
+          "role": "section_silence",
+          "melody_cot_eligible": false
+        }
+      ]
+    }
+  },
+  "llm_mapping_rule": {
+    "training_uses": "resolved global_id",
+    "semantic_asset_stores": "local semantic ID in [0,32768)",
+    "semantic_local_to_extension": "extension_id = local_id",
+    "semantic_local_to_global": "global_id = resolved.semantic_global_id_start + local_id",
+    "render_receives": "local semantic ID in [0,32768)",
+    "implicit_offset_without_resolved_registry_forbidden": true
+  },
+  "sequence_modes_required": [
+    "plain",
+    "section",
+    "unique_section"
+  ],
+  "invalidation_rule": "Any change to token strings, ordering, ranges, or tokenizer revision invalidates the resolved registry, LLM training data, and LLM checkpoint."
+}

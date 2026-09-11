@@ -1,0 +1,281 @@
+format_version: oqm.render.config.v1
+contract:
+  sample_rate: 48000
+  channels: 2
+  latent_frame_hz: 25
+  latent_dim: 128
+  segment_seconds: 1.28
+  segment_samples: 61440
+  segment_latent_frames: 32
+stft:
+  n_fft: 960
+  win_length: 960
+  hop_length: 480
+  window: hann_periodic
+  center: false
+  explicit_left_padding: 240
+  explicit_right_padding: true
+  keep_dc: true
+  drop_nyquist: true
+  bins: 480
+  analysis_dtype: float32
+  revision: open-qwen-music-stft-v1
+model:
+  spec_vae:
+    latent_dim: 128
+    posterior_variance_epsilon: 1.0e-06
+    encoder_base_channels: 64
+    decoder_base_channels: 128
+    weight_norm: true
+    revision: open-qwen-music-acoustic-vae-v1
+  refiner:
+    width: 256
+    intermediate_dim: 1024
+    depth: 12
+    kernel_size: 7
+    layer_scale_init_value: null
+    layer_norm_eps: 1.0e-05
+    block_layer_norm_eps: 1.0e-06
+    low_mid_hz: 1500.0
+    mid_high_hz: 4000.0
+    magnitude_epsilon: 1.0e-08
+    max_log_magnitude_residual: 4.0
+    revision: open-qwen-music-refiner-v1
+loss:
+  k_weighting: true
+  adaptive_log_magnitude: true
+  sample_rms_normalization: true
+  sample_rms_floor: 0.0001
+  sample_equal_reduction: true
+  stft_consistency_weight: 0.0
+  refiner_reconstruction_domain: raw
+  mr_ccpc_weight: 0.0
+  waveform_peak_envelope_weight: 0.0
+  waveform_peak_envelope_window: 63
+  waveform_peak_envelope_hop: 16
+  waveform_peak_envelope_rms_floor: 0.0001
+  refiner_residual_energy_weight: 0.0
+  refiner_residual_energy_rms_floor: 0.0001
+  si_sdr_no_regression_weight: 0.0
+  si_sdr_no_regression_margin_db: 0.0
+  mr_stft_weight: 0.1
+  mel_weight: 0.0
+  waveform_l1_weight: 0.0
+  spectrum_complex: 1.0
+  spectrum_linear: 0.5
+  spectrum_log1p: 0.5
+  lr_ms: 0.1
+  ccpc: 0.1
+  absolute_ipd: 0.1
+  spectral_pan: 0.1
+  phase_weighting: binary
+  kl_start_dim: 1
+  kl_reduction: channel_sum_mean
+  mr_stft_resolutions:
+  - - 512
+    - 128
+    - 512
+  - - 1024
+    - 256
+    - 1024
+  - - 2048
+    - 512
+    - 2048
+  mel:
+    n_fft: 1024
+    hop_length: 256
+    win_length: 1024
+    n_mels: 80
+    f_min: 0.0
+    f_max: 24000.0
+    sample_rms_normalization: true
+    sample_rms_floor: 0.0001
+  recipe: open_qwen_music_refiner_v1
+  contract: open-qwen-music.refiner-training.v1
+  spectral_reconstruction_contract: open-qwen-music.refiner-spectral-loss.v1
+  if_gd_objective: ear_wrapped_l1_v1
+  mr_stft_objective_profile: yamamoto_spectral_convergence_logmag_v1
+  mr_stft_adaptive_log_magnitude: false
+  mr_stft_sample_rms_normalization: false
+  mr_stft_spectral_convergence_epsilon: 1.0e-08
+  mixed_scale_spectral_weight: 0.0
+discriminator:
+  base_channels: 16
+  depth: 4
+  stft_scales:
+  - - 256
+    - 64
+    - 256
+  - - 384
+    - 96
+    - 384
+  - - 512
+    - 128
+    - 512
+  - - 768
+    - 192
+    - 768
+  - - 1024
+    - 256
+    - 1024
+  - - 1536
+    - 384
+    - 1536
+  - - 2048
+    - 512
+    - 2048
+  - - 4096
+    - 1024
+    - 4096
+  cqt_scales:
+  - hop_length: 256
+    fmin: 65.4064
+    n_bins: 100
+    bins_per_octave: 12
+  - hop_length: 512
+    fmin: 65.4064
+    n_bins: 100
+    bins_per_octave: 12
+  - hop_length: 1024
+    fmin: 65.4064
+    n_bins: 100
+    bins_per_octave: 12
+  enabled: true
+  stft_scale_count: 8
+  cqt_enabled: true
+  waveform_warmup_steps: 0
+  spectral_enabled: true
+  spectral_warmup_steps: 0
+  spectral_stft_scales:
+  - - 128
+    - 64
+    - 128
+  - - 256
+    - 128
+    - 256
+  - - 512
+    - 256
+    - 512
+  - - 1024
+    - 512
+    - 1024
+  - - 2048
+    - 1024
+    - 2048
+  - - 4096
+    - 2048
+    - 4096
+  waveform_family_reduction: equal_family_mean_v1
+train:
+  seed: 20260810
+  deterministic: true
+  max_steps: 1250
+  warmup_steps: 1000
+  min_lr_ratio: 0.1
+  max_grad_norm: 1.0
+  num_workers: 1
+  log_every_steps: 1
+  save_every_steps: 20001
+  valid_every_steps: 0
+  valid_batch_size_per_rank: 1
+  valid_max_batches_per_rank: 0
+  valid_selection_metric: null
+  valid_patience: 0
+  valid_min_delta: 0.0001
+  output_dir: ${OQM_OUTPUT_ROOT:-./outputs}/refiner/train
+  amp: false
+  amp_dtype: bfloat16
+  valid_posterior_mode: mean
+  optimizer_policy:
+    muon_implementation: oqm_explicit_newton_schulz_v1
+    non_matrix_rule: momentum_sgd
+    silent_adam_fallback: false
+  vae_posterior_mode: mean
+  expected_source_posterior_mode: sample
+  batch_size_per_rank: 1
+  segment_seconds: 1.28
+  generator_steps_per_discriminator: 4
+  generator_optimizer:
+    name: adamw
+    lr: 0.00015
+    betas:
+    - 0.9
+    - 0.95
+    weight_decay: 0.01
+  waveform_discriminator_optimizer:
+    name: adamw
+    lr: 1.0e-06
+    betas:
+    - 0.9
+    - 0.95
+    weight_decay: 0.01
+  spectral_discriminator_optimizer:
+    name: adamw
+    lr: 1.0e-05
+    betas:
+    - 0.9
+    - 0.95
+    weight_decay: 0.01
+  expected_world_size: 64
+  expected_global_batch_size: 64
+  require_full_valid_coverage: true
+  prefetch_factor: 2
+  require_empty_output_dir: true
+  require_explicit_stop_at_step: true
+  quality_gate_steps:
+  - 1250
+  checkpoint_steps:
+  - 1250
+data:
+  manifest: ${OQM_DATA_ROOT:-./data}/refiner/train.jsonl
+  split: train
+  segment_samples: 61440
+  random_crop: true
+  verify_audio_sha256: true
+  allow_source_audio: true
+  release_ready: null
+  valid_manifest: ${OQM_DATA_ROOT:-./data}/refiner/valid.jsonl
+  audio_integrity_mode: node_once
+  batch_plan: null
+  batch_plan_sha256: null
+  require_exact_exposure: false
+  allow_prefix_exposure: false
+checkpoint:
+  format_version: oqm.render.ckpt.v1
+  required_upstream_sha_keys:
+  - data_manifest_sha256
+  - stft_config_sha256
+  - spec_vae_sha256
+smoke:
+  count: 2
+  channels:
+  - 2
+  - 2
+  - 2
+  - 2
+  - 2
+  - 2
+  - 2
+  encoder_base_channels: 2
+  decoder_base_channels: 4
+  refiner_width: 4
+  refiner_depth: 1
+  discriminator_base_channels: 2
+  discriminator_depth: 2
+  stft_scales:
+  - - 256
+    - 64
+    - 256
+stage: 3
+component: refiner
+loss_weights:
+  stft: 0.5
+  if_gd: 0.1
+  kl: 0.0
+  waveform_adversarial: 0.175
+  waveform_feature_matching: 20.0
+  spectral_adversarial: 0.5
+  spectral_feature_matching: 35.0
+spec_vae_parameter_budget:
+  minimum: 100000000
+  maximum: 110000000

@@ -1,0 +1,134 @@
+format_version: oqm.render.dit.config.v1
+architecture:
+  type: stable_audio_3
+  profile: stable-audio-3-medium-compatible-v1
+  source_repository: Stability-AI/stable-audio-3
+  source_commit: a0b57f5483c4588f827f3552b7d5c6ca2a9687be
+  native_config:
+    io_channels: 128
+    embed_dim: 1536
+    depth: 24
+    num_heads: 24
+    cond_token_dim: 1024
+    global_cond_dim: 1024
+    local_add_cond_dim: 1024
+    global_cond_type: adaLN
+    timestep_features_type: expo
+    diffusion_objective: rectified_flow
+    attn_kwargs:
+      qk_norm: rms
+      differential: true
+    norm_type: rms_norm
+    norm_kwargs:
+      force_fp32: true
+    ff_kwargs:
+      mult: 4.0
+    num_memory_tokens: 64
+model:
+  latent_dim: 128
+  latent_frame_hz: 25
+  hidden_size: 1024
+  context_dim: 1024
+  max_frames: 9000
+  adaln_conditioning: timestep_plus_global_loudness
+  activation_checkpointing: true
+conditioning:
+  description_max_tokens: 256
+  lyrics_max_tokens: 1536
+  lyrics_encoder_layers: 6
+  lyrics_encoder_heads: 16
+  lyrics_head_dim: 64
+  lyrics_ffn_expansion: 4
+  dropout: 0.0
+  text_drop_probability: 0.2
+  text_encoder:
+    model_id: Qwen/Qwen3-Embedding-0.6B
+    revision: b22da495047858cce924d27d76261e96be6febc0
+    tokenizer_revision: b22da495047858cce924d27d76261e96be6febc0
+    cache_revision: open-qwen-music-render-text-cache-v1
+    hidden_size: 1024
+    local_files_only: true
+    truncation_policy: reject
+    local_path: ${OQM_MODEL_ROOT:-./models}/Qwen3-Embedding-0.6B
+    asset_lock: third_party/render.lock.json
+  semantic_vocab_size: 32768
+  initialization: dit_xavier
+  semantic_source_dim: 16
+  semantic_embedding_asset:
+    embedding_key: tokenizer_codebook
+    trainable: true
+    expected_source: tokenizer_effective_codebook
+  global_loudness_conditioning: true
+  global_loudness_clamp_std: 4.0
+flow:
+  format_version: oqm.render.flow.v2
+  path: linear
+  source_distribution: gaussian
+  timestep_distribution: uniform
+  prediction_target: velocity
+  loss_weighting: uniform
+  time_direction: data_to_noise
+revisions: {}
+data:
+  root: ${OQM_DATA_ROOT:-./data}/renderer
+  split: train
+  latent_posterior_mode: sample
+  latent_posterior_base_seed: 2026090201
+  latent_posterior_seed_derivation: sha256-little-endian-63-v1
+  latent_posterior_epsilon_draw_layout: contiguous_bdt
+  required_quality_profile: render_broad
+  duration_buckets_seconds:
+  - 30
+  - 90
+  - 180
+  - 360
+  batch_size_by_bucket:
+    30: 1
+    90: 1
+    180: 1
+    360: 1
+  num_workers: 4
+  drop_last: false
+  shuffle: true
+optimizer:
+  name: AdamW
+  lr: 5.0e-05
+  betas:
+  - 0.9
+  - 0.95
+  weight_decay: 0.01
+  warmup_steps: 2000
+  scheduler: constant
+  ema_mode: parameter_fp32
+  ema_decay: 0.999
+  fused: true
+train:
+  seed: 2026090201
+  device: cuda
+  precision: bf16
+  batch_size_per_rank: 1
+  expected_world_size: 64
+  gradient_accumulation_steps: 4
+  global_parent_batch_size: 256
+  gradient_clip_norm: 1.0
+  max_steps: 29000
+  save_every_steps: 1000
+  output_dir: ${OQM_OUTPUT_ROOT:-./outputs}/renderer/train
+  semantic_embedding_freeze_steps: 5000
+  activation_checkpoint_block_interval: 2
+semantic_corruption:
+  format_version: oqm.render.semantic-corruption.v1
+  mode: emdc_knn
+  clean_steps: 25000
+  ramp_steps: 1000
+  top_k: 384
+  temperature: 1.0
+  seed: 666
+  robust_sample_probability: 0.25
+  asset: {}
+validation:
+  enabled: false
+  split: valid
+  every_steps: 1000
+  batch_size_per_rank: 1
+  num_workers: 2

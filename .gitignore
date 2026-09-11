@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.ipynb_checkpoints/
+.pytest_cache/
+.coverage
+htmlcov/
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+.hf_token
+
+# Training artifacts and large files
+*.ckpt
+*.pt
+*.pth
+*.safetensors
+*.wav
+*.flac
+*.mp3
+data/audio/
+data/smoke/
+data/shards/
+data/**/*.tar
+data/**/*.tar.gz
+data/**/*.zip
+data/**/*.npy
+data/manifests/*.rank*
+dataset/
+checkpoints/
+outputs/
+logs/
+wandb/
+*.log
+*.tmp
+
+# OS / IDE
+.DS_Store
+.idea/
+.vscode/

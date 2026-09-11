@@ -1,0 +1,112 @@
+work_dir: ${ANNOT_WORK:-./.runtime/work}/default
+index:
+  extensions:
+  - .wav
+  - .flac
+  - .mp3
+  - .ogg
+  - .m4a
+  - .opus
+  min_duration_sec: 20.0
+  max_duration_sec: 600.0
+  sources: []
+separate:
+  python: ${ANNOT_PY:-python3}
+  nproc_per_node: 8
+  nnodes: 8
+  min_coverage: 0.9
+  extra_args:
+    backend: hdemucs
+    chunk-sec: 10.0
+    overlap-sec: 1.0
+    activity-threshold-db: -12.0
+    min-activity-sec: 0.4
+    save-activity-profile: 'false'
+    keep-stem: 'false'
+structure:
+  python: ${ANNOT_PY:-python3}
+  nproc_per_node: 8
+  nnodes: 8
+  min_coverage: 0.9
+  extra_args:
+    model-dir: ASLP-lab/SongFormer
+asr.vocal:
+  python: ${ANNOT_PY:-python3}
+  nproc_per_node: 8
+  nnodes: 8
+  min_coverage: 0.85
+  extra_args:
+    model-dir: Qwen/Qwen3-ASR-1.7B
+    window-sec: 28.0
+    overlap-sec: 3.0
+    batch-size: 8
+asr.mix:
+  python: ${ANNOT_PY:-python3}
+  nproc_per_node: 8
+  nnodes: 8
+  min_coverage: 0.85
+  extra_args:
+    model-dir: Qwen/Qwen3-ASR-1.7B
+    window-sec: 28.0
+    overlap-sec: 3.0
+    batch-size: 8
+lyrics:
+  min_text_units: 3
+  voice_min_ratio: 0.3
+  voice_min_stem_db: -12.0
+  undertranscribed_max_ratio: 0.3
+  undertranscribed_min_voiced_sec: 8.0
+  window_path_select: undertranscribed
+  window_path_max_looping: 0.5
+  window_path_min_gain_multiple: 3.0
+align:
+  python: ${ANNOT_PY:-python3}
+  nproc_per_node: 8
+  nnodes: 8
+  min_coverage: 0.8
+  accept_tiers:
+  - checked
+  extra_args:
+    model-dir: Qwen/Qwen3-ForcedAligner-0.6B
+    batch-size: 4
+sections:
+  min_section_sec: 2.0
+  min_section_units: 2
+  min_section_coverage: 0.05
+  line_gap_percentile: 0.75
+  line_gap_sec: 0.3
+  line_gap_max_sec: 1.5
+  break_min_silent_ratio: 0.5
+  min_vocal_overlap: 0.15
+  min_vocal_label_overlap: 0.5
+  merge_same_label: true
+  same_label_max_sec: 30.0
+  same_label_max_strength: 0.3
+  same_label_weak_strength: 0.05
+  boundary_snap_sec: 1.2
+  boundary_reconcile_max_sec: 1.0
+  split_phrases_at_boundaries: true
+voice:
+  python: ${ANNOT_PY:-python3}
+  nproc_per_node: 8
+  nnodes: 8
+  min_coverage: 0.85
+  extra_args:
+    max-analyze-sec: 120.0
+tags.llm:
+  python: ${ANNOT_PY:-python3}
+  nproc_per_node: 8
+  nnodes: 8
+  min_coverage: 0.85
+  extra_args:
+    model-dir: Qwen/Qwen3-Omni-30B-A3B-Instruct
+    max-new-tokens: 384
+    holistic-audio-sec: 120.0
+    attn-implementation: sdpa
+tags.fuse:
+  max_tags_per_field: 5
+  min_acoustic_gender_confidence: 0.55
+emit:
+  min_tag_confidence: 0.4
+  min_lyric_sections: 2
+  min_lyric_coverage: 0.15

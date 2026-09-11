@@ -1,0 +1,155 @@
+stage: stage1
+registry:
+  semantic_size: 32768
+  melody_size: 256
+  pad_to_multiple_of: 256
+  resolved_path: src/open_qwen_music/llm/configs/token_registry.resolved.json
+  resolved_revision: sha256:3e10ba0235e7ffacfcdce61dfe39d239
+  semantic_tokenizer_revision: ${OQM_TOKENIZER_REVISION}
+  semantic_extractor_revision: ${OQM_TOKENIZER_EXTRACTOR_REVISION}
+model:
+  base_model_path: ${OQM_MODEL_ROOT:-./models}/Qwen2.5-Omni-3B
+  base_model_revision: sha256:5c2916d56a0cd5a0577be954b00cbc075e940f2639afac0b4058f2955e48d709
+  tokenizer_path: null
+  text_tokenizer_revision: sha256:9a8c66e1f2cc17a84adafc768aaefb79bfe9ba66c1594b73e7aab4320083ca6f
+  dtype: fp32
+  attn_implementation: flash_attention_2
+  loss_chunk_size: 256
+  untie_word_embeddings: false
+  partitioned_embeddings: false
+  tie_music_embeddings: false
+  tie_embedding_namespaces: null
+  semantic_output_residual_rank: 0
+  modality_type_embeddings: false
+  grammar_constrained_loss: false
+  grammar_constrained_metrics: true
+  local_cache_dir: ${OQM_CACHE_ROOT:-./.cache/open-qwen-music}/oqm-model-cache
+  gradient_checkpointing: true
+  init_norm_ratio: 1.0
+  accuracy_sample_positions: 4096
+  melody_class_weights:
+    unvoiced_id: 255
+    unvoiced_weight: 0.85
+condition:
+  tag_fields:
+  - genre
+  - mood
+  - instruments
+  - vocal_gender
+  - vocal_timbre
+  - language
+  - bpm
+  - key
+  include_instrumental_language: true
+  include_instrumental_marker: true
+sequence:
+  max_sequence_length: 4096
+  max_semantic_frames: 750
+  min_semantic_frames: 100
+  max_condition_tokens: 1792
+  min_section_melody_frames: 2
+  melody_section_policy: lyrics_only
+  resample_unique_sections: false
+  semantic_section_reanchor: false
+  semantic_anchor_max_text_tokens: 256
+  random_crop: false
+  overflow_policy: error
+sampler:
+  strict_paper: true
+  modes:
+    plain: 1.0
+  mode_ratio_scope: all
+  melodic_vocal_plain_floor: 0.0
+  instrumental_ratio: 0.2
+  language:
+    balance: false
+    temperature: 0.5
+  genre:
+    balance: false
+    temperature: 1.0
+  condition_token_estimate: 1792
+  candidate_pool_batches: 16
+curriculum:
+  schedule:
+  - step: 0
+    weights:
+      Q1: 0.3147899811022434
+      Q2: 0.12719459201766992
+      Q3: 0.5580154268800867
+data:
+  corpus: ${OQM_DATA_ROOT:-./data}/llm/corpus
+  split: train
+  num_workers: 0
+  prefetch_factor: 4
+  local_cache_dir: ${OQM_CACHE_ROOT:-./.cache/open-qwen-music}/llm-corpus
+  require_production_contract: true
+optimizer:
+  lr: 0.0001
+  betas:
+  - 0.9
+  - 0.95
+  eps: 1.0e-08
+  weight_decay: 0.01
+  warmup_steps: 0
+  decay: constant
+  min_lr_ratio: 0.1
+  embedding_lr_scale: 1.0
+  text_embedding_lr_scale: null
+  new_embedding_lr_scale: null
+  type_embedding_lr_scale: null
+train:
+  seed: 2026090716
+  output_dir: ${OQM_OUTPUT_ROOT:-./outputs}/llm/stage1
+  allow_root_stage: true
+  inherit_data_state_from_parent: false
+  precision: bf16
+  max_tokens_per_gpu: 4096
+  max_batch_size: 1
+  expected_world_size: 64
+  gradient_accumulation_steps: 2
+  expected_global_batch_size: 128
+  gradient_clip_norm: 2.0
+  max_steps: 5000
+  log_every_steps: 10
+  save_every_steps: 500
+  milestone_every_steps: 1000
+  save_final_checkpoint: true
+  pad_to_multiple_of: 64
+  steps_per_epoch: 2278
+  parallel_strategy: ddp
+  fsdp_param_dtype: bf16
+  fsdp_reduce_dtype: fp32
+  fsdp_reshard_after_forward: false
+  checkpoint_format: single_file
+  ddp_bucket_cap_mb: 50
+  ddp_gradient_as_bucket_view: true
+  ddp_static_graph: false
+  local_checkpoint_cache_dir: ${OQM_CACHE_ROOT:-./.cache/open-qwen-music}/llm-checkpoints
+  allow_provenance_mismatch: false
+  allow_existing_output: false
+  allow_resume_config_mismatch: false
+  split_batches_to_budget: true
+  max_consecutive_nonfinite_steps: 5
+  semantic_history_corruption_rate: 0.0
+  stall_warn_seconds: 900
+  sampling_diagnostics_every_steps: 1000
+generation:
+  max_new_tokens: 2048
+  temperature: 0.7
+  top_p: 0.98
+  top_k: 0
+  semantic_repetition_penalty: 0.1
+  semantic_repetition_window: 64
+  plain_semantic_repetition_penalty: 0.0
+  melody_repetition_penalty: 0.0
+  melody_repetition_window: 32
+  melody_unvoiced_run_threshold: 0
+  melody_unvoiced_run_penalty: 0.0
+  plain_semantic_eos_bias: 0.0
+  plain_semantic_eos_bias_start_frames: 0
+  plain_semantic_eos_bias_interval_frames: 625
+  allow_decode_source_revision_mismatch: true
+  min_semantic_frames: 25
+  max_melody_tokens: 188
+  max_melody_segments: 16
+  max_semantic_frames: 750

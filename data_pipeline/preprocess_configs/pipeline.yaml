@@ -1,0 +1,66 @@
+version: v1
+work_dir: ${OQM_WORK_DIR:-../.work}
+release_dir: ${OQM_RELEASE_ROOT:-../.release}
+registry_dir: registry
+filters:
+  duration:
+    whole_song:
+    - 10.0
+    - 1800.0
+    clip:
+    - 2.0
+    - 1800.0
+    phrase:
+    - 0.5
+    - 1800.0
+    note:
+    - 0.2
+    - 1800.0
+  duration_relative_error: 0.05
+  duration_absolute_error_sec: 1.0
+  near_silent_ratio: 0.95
+  clipping_ratio: 0.05
+  fake_stereo_correlation: 0.999
+  min_effective_bandwidth_ratio: 0.6
+  min_bitrate_kbps: 64.0
+  target_sample_rate_hz: 24000
+  heavy_leading_silence_ratio: 0.3
+  lyrics_min_chars_per_sec: 0.15
+  lyrics_max_chars_per_sec: 12.0
+  lyrics_min_chars: 4
+dedup:
+  enable_l0_uri: true
+  enable_l1_bytes: true
+  enable_l15_external_id: true
+  enable_l2_fingerprint: true
+  duration_bucket_sec: 0.5
+  external_id_keys:
+  - jamendo_track_id
+  - youtube_id
+  - spotify_id
+  - msd_track_id
+  - fma_track_id
+  - musicbrainz_id
+  - freesound_id
+  - TRACK_ID
+  weight_lossless: 10.0
+  weight_sample_rate: 5.0
+  weight_has_lyrics: 3.0
+  weight_has_tags: 3.0
+  weight_duration: 2.0
+  weight_priority: 0.1
+  penalty_synthetic: 5.0
+split:
+  train_pct: 96
+  valid_pct: 2
+runtime:
+  workers: 8
+  discover_workers: 8
+  probe_prefetch: 2
+  probe_prefetch_bytes: 268435456
+  shard_size: 20000
+  row_group_size: 50000
+  compression: zstd
+  compression_level: 7
+  handle_cache: 8
+  probe_timeout_sec: 300
